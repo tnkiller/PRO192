@@ -1,6 +1,7 @@
 package controller;
 
 import java.text.ParseException;
+import java.util.ArrayList;
 import model.*;
 import view.Menu;
 import view.Utils;
@@ -29,8 +30,10 @@ public class Management {
                     delEmp();
                 case 5 ->
                     exportAvrSal();
-                case 0 ->
+                case 0 -> {
                     System.out.println("See you again...");
+                    System.exit(0);
+                }
                 default ->
                     System.out.println("Invalid choice!...");
             }
@@ -62,13 +65,13 @@ public class Management {
     }
 
     //display
-    public void displayEmp() {
+    public void displayEmp() throws ParseException {
         if (comp.getEmpList() != null) {
-            int choice;
+            int option;
             do {
                 Menu.showDetailMenu();
-                choice = Integer.parseInt(Utils.getValue("You choose: "));
-                switch (choice) {
+                option = Integer.parseInt(Utils.getValue("You choose: "));
+                switch (option) {
                     case 1 -> {
                         System.out.println("\t\t\t~~~~~~~~~~All employees in company~~~~~~~~~~");
                         System.out.format("%-5s | %-10s | %-10s | %-5s | %-10s | %-15s | %-10s\n",
@@ -114,15 +117,19 @@ public class Management {
                         );
                         for (Employee i : comp.getEmpList()) {
                             if (i instanceof PartTimeEmployee) {
-                                System.out.println(i.toString());
+                                System.out.print(i.toString());
                             }
                         }
 
                     }
+                    case 3 -> {
+                        execute(0);
+                        System.out.println("Backed...");
+                    }
                     default ->
                         System.out.println("Invalid! Choose again");
                 }
-            } while (choice > 3);
+            } while (option > 3 || option < 1);
 
         } else {
             System.out.println("Empty list...");
@@ -159,24 +166,52 @@ public class Management {
     //search and delete according to name
     public void delEmp() {
         if (!comp.getEmpList().isEmpty()) {
-            String searchName = Utils.getValue("Enter name employee need deleted: ");
+            //searching
+            String searchName = Utils.getValue("Enter employee name you want to find: ");
+            ArrayList<Employee> temp = new ArrayList<>();
+            ArrayList<Integer> index = new ArrayList<>();
             boolean isExist = false;
             for (int i = 0; i < comp.getEmpList().size(); i++) {
                 if (comp.getEmpList().get(i).getFirstName().equalsIgnoreCase(searchName)) {
                     isExist = true;
-                    comp.getEmpList().remove(i);
-                    break;
+                    temp.add(comp.getEmpList().get(i));
+                    index.add(i);
                 }
             }
-            if (!isExist) {
-                System.out.println("Can't find name in list...");
+            if (isExist == true) {
+                System.out.println("\t\t~~~~~~~~~List of employees named \"" + searchName + "\"~~~~~~~~~");
+                System.out.format("%-5s | %-10s | %-10s | %-10s\n",
+                        "ID",
+                        "Last Name",
+                        "First Name",
+                        "Type of employee"
+                );
+                for (Employee i : temp) {
+                    if (i instanceof FullTimeEmployee) {
+                        System.out.printf("%-5s | %-10s | %-10s | %-10s\n",
+                                i.getId(),
+                                i.getLastName(),
+                                i.getFirstName(),
+                                "Full-time");
+                    } else {
+                        System.out.printf("%-5s | %-10s | %-10s | %-10s\n",
+                                i.getId(),
+                                i.getLastName(),
+                                i.getFirstName(),
+                                "Part-time");
+                    }
+                }
+                temp.clear();
+                //delete
+                int opt = Integer.parseInt(Utils.getValue("You want to remove index (begin with 0):"));
+                comp.getEmpList().remove(index.get(opt).intValue());
+                System.out.println("Deleted successfully");
             } else {
-                System.out.println("Deleted successfully!");
+                System.out.println("Don't find name in list...");
             }
         } else {
             System.out.println("Empty list...");
         }
-
     }
 
     //export average salary according to each type of emp

@@ -1,8 +1,6 @@
 package controller;
 
 import java.text.ParseException;
-import view.Menu;
-import view.Utils;
 
 public class Run {
 
